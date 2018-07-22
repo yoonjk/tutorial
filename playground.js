@@ -90,10 +90,127 @@ async function registerPartner(cardId, partnerId, name) {
 }
 
 /*
- *
- *
+ * Create Member participant and import card for identity
+ * @param cardId mebmer를 위한 카드 id를 반입(등록)
+ * @param {String} accountNumber
  */
- async function
+ async function regisgterMember(cardId, accountNumber,firstName, lastName, email, phoneNumber) {
+   try {
+     businessNetworkConnection = new BusinessNetworkConnection();
+     //connect as admin
+     businessNetworkConnection.connect(ADMIN);
+
+     //get the factory for the business network.
+     factory = businessNetworkConnection.getBusinessNetwork().getFactory();
+
+     const member = factory.newResource(namespace, 'Member', accountNumber);
+
+     member.firstName = firstName;
+     member.lastName = lastName;
+     member.email = email;
+     member.phoneNumber = phoneNumber;
+
+     const participantRegistory = await businessNetworkConnection.getParticipantRegistry(namespace +'.Member');
+     participantRegistory.add(member);
+
+     // issue identity
+     const identity = businessNetworkConnection.issueIdentity(namespace + '.Member#' + accountNumber, cardId);
+     //import card for identity
+     importCardForIdentity(cardId, identity);
+     //disconnect
+     businessNetworkConnection.disconnect(ADMIN);
+
+     return true;
+   } catch (err) {
+     console.log(err);
+     const error = {}
+     error.error = err.message;
+
+     return error;
+   }
+ }
+
+/*
+ * 다른 비즈니스 네트워크 카드를 사용하여 재연결
+ * @param {String} cardName 주어진 카드네임으로 비즈니스 네트워크 연결을 재사용
+ */
+ async function useIdentity(cardName) {
+   //disconnect existing connection
+   await businessNetworkConnection.disconnect();
+
+   //connect to network using cardName
+   businessNetworkConnection = new BusinessNetworkConnect();
+   await businessNetworkConnection.connect(cardName);
+ }
+
+
+
+ /*
+ * 포인트 획득 트랜잭션을 수행
+ * @param {String} cardId 비즈니스 네트워크 카드 Id
+ * @param {String} accountNumber member Id
+ */
+ async function earnPointsTransaction(cardId, accountNumber, partnerId, points) {
+   try {
+     //connect to network with cardId
+     businessNetworkConnection = new BusinessNetworkConnect();
+     businessNetworkCOnnection.connect(cardId);
+
+     //get the factory for the business network.
+     factory = businessNetworkConnection.getBusinessNetwork().getFactory();
+
+     //create transaction
+     const earnPoints = factory.newTransaction(namespace, 'EarnPoints');
+     earnPoints.points = points;
+     earnPoints.member = factory.newRelationship(namespace, 'Member', accountNumber);
+     earnPoints.partner = factory.newRelationship(namespace, 'Partner', partnerId);
+
+     //submit transaction
+     await businessNetworkConnection.submitTransaction(earnPoints);
+     //disconnect
+     await businessNetworkConnection.disconnect(cardId);
+
+     return true;
+   } catch(err) {
+     console.log(err);
+
+     const error = {};
+     error.error = err.message;
+
+     return error;
+   }
+ }
+
+ async function usePointsTransaction(cardId, accountNumber, partnerId, points) {
+   try {
+     businessNetworkConnection = new BusinessNetworkConnection();
+     // connect to network with cardId
+     businessNetworkConnection.connect(cardId);
+
+     //get the factory for the business network.
+     factory = businessNetworkConnection.getBusinessNetwork().getFactory();
+
+     //create transaction
+     const usePoints = factory.newTransaction(namespace, 'UsePoints');
+     usePoints.points = points;
+     usePoints.member = factory.newRelationship(namespace, 'Member', accountNumber);
+     usePoints.partner = factory.newRelationship(namespace, 'Partner', partnerId);
+
+     //submit transaction
+     await businessNetworkConnection.submitTransaction(usePoints);
+
+     await businessNetworkConnection.disconnect(cardId);
+
+     return true;
+   } catch(err) {
+     console.log(err);
+
+     const error = {};
+     error.error = err.message;
+
+     return error;
+   }
+ }
 
 const cardName = process.argv[2];
 const partnerId = process.argv[3];

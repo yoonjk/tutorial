@@ -12,7 +12,8 @@
     "dotenv": "^6.0.0",
     "express": "^4.16.3",
     "express-ipfilter": "^0.3.1",
-    "http": "0.0.0"
+    "http": "0.0.0",
+    "lodash": "^4.17.10"
   },
   "Devdependencies": {},
   "scripts": {

@@ -1,4 +1,5 @@
 
+const _ = require('lodash');
 
 // array
 for (const value of ['a1','a2','a3','a4','a5']) {
@@ -36,3 +37,27 @@ for (var key in lunch) {
 		console.log(`in lunch[${key}]:${lunch[key]}`); // value (ex. turkey)
 	}
 }
+
+const obj1 = {
+    firstName: 'John',
+    lastName: 'Doe',
+    age: 50,
+    eyeColor: 'blue'
+};
+
+_.forEach(obj1, (value, key) => {
+  console.log(`for each key:${key}, value:${value}`)
+});
+
+for (const [key, value] of Object.entries(obj1)) {
+  console.log(`Object.entries ${key}: ${value}`);
+}
+
+for (const key of Object.keys(obj1)) {
+  console.log(`Object.entries ${key}: ${obj1[key]}`);
+}
+
+Object.entries(obj1).forEach(entry => {
+  const [key, value] = entry;
+  console.log(`Object.entries ${key}: ${value}`);
+})
