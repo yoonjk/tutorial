@@ -4,13 +4,14 @@ const AdminConnection = require('composer-admin').AdminConnection;
 const BusinessNetworkConnection = require('composer-client').BusinessNetworkConnection;
 const { BusinessNetworkDefinition, CertificateUtil, IdCard } = require('composer-common');
 
-const admin = process.env.ADMIN;
+const ADMIN = process.env.ADMIN;
 //declate namespace
 const namespace = process.env.NAMESPACE
 const businessNetworkName = process.env.BUSINESS_NETWORK_NAME;
 //in-memory card store for testing so cards are not persisted to the file system
 const cardStore = require('composer-common').NetworkCardStoreManager.getCardStore( { type: 'composer-wallet-inmemory' } );
 
+console.log('namespace:', namespace);
 //admin connection to the blockchain, used to deploy the business network
 let adminConnection;
 
@@ -153,20 +154,22 @@ async function registerPartner(cardId, partnerId, name) {
  async function earnPointsTransaction(cardId, accountNumber, partnerId, points) {
    try {
      //connect to network with cardId
-     businessNetworkConnection = new BusinessNetworkConnect();
-     businessNetworkCOnnection.connect(cardId);
+     businessNetworkConnection = new BusinessNetworkConnection();
+
+     await businessNetworkConnection.connect(cardId);
 
      //get the factory for the business network.
      factory = businessNetworkConnection.getBusinessNetwork().getFactory();
 
      //create transaction
-     const earnPoints = factory.newTransaction(namespace, 'EarnPoints');
-     earnPoints.points = points;
-     earnPoints.member = factory.newRelationship(namespace, 'Member', accountNumber);
-     earnPoints.partner = factory.newRelationship(namespace, 'Partner', partnerId);
+     const usePoints = factory.newTransaction(namespace, 'EarnPoints');
+     usePoints.points = parseFloat(points);
+     usePoints.member = factory.newRelationship(namespace, 'Member', accountNumber);
+     usePoints.partner = factory.newRelationship(namespace, 'Partner', partnerId);
 
      //submit transaction
-     await businessNetworkConnection.submitTransaction(earnPoints);
+     await businessNetworkConnection.submitTransaction(usePoints);
+
      //disconnect
      await businessNetworkConnection.disconnect(cardId);
 
@@ -212,9 +215,133 @@ async function registerPartner(cardId, partnerId, name) {
    }
  }
 
-const cardName = process.argv[2];
-const partnerId = process.argv[3];
-const partnerName = process.argv[4];
+ /*
+ * Get all EarnPoints transactions data
+ * @param {String} cardId Card id to connect to network
+ */
+ async function earnPointsTransactionsInfo  (cardId) {
 
-console.log(`cardName:${cardName}, partnerId:${partnerId}, partnerName:${partnerName}`)
-//registerPartner(cardName, partnerId, partnerName);
+   try {
+     //connect to network with cardId
+     businessNetworkConnection = new BusinessNetworkConnection();
+     await businessNetworkConnection.connect(cardId);
+
+     //query EarnPoints transactions on the network
+     const earnPointsResults = await businessNetworkConnection.query('selectEarnPoints');
+
+     //disconnect
+     await businessNetworkConnection.disconnect(cardId);
+
+     //return earnPointsResults object
+     return earnPointsResults;
+   }
+   catch(err) {
+     //print and return error
+     console.log(err);
+     var error = {};
+     error.error = err.message;
+     return error
+   }
+
+ }
+ async function allPartnerInfo(cardId) {
+   try {
+     businessNetworkConnection = new BusinessNetworkConnection();
+
+     await businessNetworkConnection.connect(cardId);
+
+     const partnerInfo = await businessNetworkConnection.query('selectPartners');
+
+     await businessNetworkConnection.disconnect(cardId);
+
+     return partnerInfo;
+   } catch(err) {
+     console.log(err);
+
+     const error = {};
+     error.error = err.message;
+
+     return error;
+   }
+ }
+
+ /*
+ * Get all UsePoints transactions data
+ * @param {String} cardId Card id to connect to network
+ */
+ async function usePointsTransactionsInfo   (cardId) {
+
+   try {
+     //connect to network with cardId
+     businessNetworkConnection = new BusinessNetworkConnection();
+     await businessNetworkConnection.connect(cardId);
+
+     //query UsePoints transactions on the network
+     const usePointsResults = await businessNetworkConnection.query('selectUsePoints');
+
+     //disconnect
+     await businessNetworkConnection.disconnect(cardId);
+
+     //return usePointsResults object
+     return usePointsResults;
+   }
+   catch(err) {
+     //print and return error
+     console.log(err);
+     var error = {};
+     error.error = err.message;
+     return error
+   }
+
+ }
+
+ /*
+ * Get Member data
+ * @param {String} cardId Card id to connect to network
+ * @param {String} accountNumber Account number of member
+ */
+ async function memberData (cardId, accountNumber) {
+
+   try {
+
+     //connect to network with cardId
+     businessNetworkConnection = new BusinessNetworkConnection();
+     await businessNetworkConnection.connect(cardId);
+
+     //get member from the network
+     const memberRegistry = await businessNetworkConnection.getParticipantRegistry(namespace + '.Member');
+     const member = await memberRegistry.get(accountNumber);
+
+     //disconnect
+     await businessNetworkConnection.disconnect(cardId);
+
+     //return member object
+     return member;
+   }
+   catch(err) {
+     //print and return error
+     console.log(err);
+     var error = {};
+     error.error = err.message;
+     return error;
+   }
+
+ }
+
+const cardId = process.argv[2];
+const accountNumber = process.argv[3];
+// const partnerId = process.argv[3];
+// const partnerName= process.argv[4];
+// const cardId = process.argv[2];
+// const accountNumber = process.argv[3];
+// const partnerId = process.argv[4];
+// const points = process.argv[5];
+//console.log(`cardId:${cardId}, partnerId:${partnerId}, partnerName:${partnerName}`)
+// console.log(`cardId:${cardId}, accountNumber:${accountNumber}, partnerId:${partnerId}, points:${points}`)
+
+// earnPointsTransaction(cardId, accountNumber, partnerId, points);
+//registerPartner(cardId, partnerId, partnerName);
+memberData(cardId, accountNumber)
+.then(allPartnerInfoData => {
+  console.log('allPartnerInfo:', JSON.stringify(allPartnerInfoData));
+})
