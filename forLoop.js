@@ -46,7 +46,7 @@ const obj1 = {
 };
 
 _.forEach(obj1, (value, key) => {
-  console.log(`for each key:${key}, value:${value}`)
+  console.log(`_.forEach key:${key}, value:${value}`)
 });
 
 for (const [key, value] of Object.entries(obj1)) {
@@ -54,10 +54,35 @@ for (const [key, value] of Object.entries(obj1)) {
 }
 
 for (const key of Object.keys(obj1)) {
-  console.log(`Object.entries ${key}: ${obj1[key]}`);
+  console.log(`Object.key ${key}: ${obj1[key]}`);
 }
 
 Object.entries(obj1).forEach(entry => {
   const [key, value] = entry;
   console.log(`Object.entries ${key}: ${value}`);
 })
+
+const rows = 
+{ outBinds:  '',
+  rowsAffected: '',
+  metaData: [ { name: 'COL1' }, { name: 'COL2' }, { name: 'COL3' } ],
+  rows: 
+   [ [ 'u01', 'jaeguk', 'test01' ],
+     [ 'u02', 'jaeguk', 'test02' ],
+     [ '123', 'kildong', 'col2' ],
+     [ '123', 'kildong', 'col2' ],
+     [ '12', 'kildong', 'col1' ],
+     [ '123', 'kildong', 'col2' ],
+     [ '123', 'kildong', 'col2' ],
+     [ '12', 'kildong', 'col1' ],
+     [ '123', 'kildong', 'col2' ],
+     [ '123', 'kildong', 'col2' ],
+     [ '12', 'kildong', 'col1' ] ] }
+
+
+
+for (const [key, value] of Object.entries(rows.metaData)) {
+  const {name, val} = rows.metaData[key];
+  console.log('val:', name)
+  console.log(`Object.key==== ${key}: ${rows.metaData[key]}, value:${value}, name:${name}`);
+}  

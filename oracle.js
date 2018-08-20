@@ -1,10 +1,9 @@
 var oracledb      = require('oracledb');
 
-var dbConfig = {
+var dbconfig = {
    user: 'nexweb',
    password: 'passw0rd',
-   connectString: 'localhost/XE'
-};
+   connectString: 'localhost/XE' };
 
 class Database {
     constructor( config ) {
@@ -26,18 +25,34 @@ class Database {
             oracledb.getConnection( this.dbConfig )
             .then(connection => {
               this.connection = connection;
-              connection.execute( sql, args, { outFormat: oracledb.OBJECT }, ( err, rows ) => {
+
+              if (args) {
+                connection.execute( sql, args, ( err, rows ) => {
                   if ( err )
                       return reject( err );
                   resolve( rows );
                   connection.close(
-                  function(err) {
-                    if (err) {
-                      console.error(err.message);
-                      reject(err)
-                    }
-                  });
-              } );
+                    function(err) {
+                      if (err) {
+                        console.error(err.message);
+                        reject(err)
+                      }
+                    });
+                }); //execute
+             } else {
+                connection.execute( sql, ( err, rows ) => {
+                  if ( err )
+                      return reject( err );
+                  resolve( rows );
+                  connection.close(
+                    function(err) {
+                      if (err) {
+                        console.error(err.message);
+                        reject(err)
+                      }
+                    });
+                }); //execute
+              }
             })
 
         } );
@@ -93,46 +108,5 @@ class Database {
     }
 }
 
-const db = new Database(dbConfig);
-let args = ['123456'];
-db.query( 'SELECT col1, col2, col3 FROM test ')
-    .then( rows => console.log('select col1:',rows) )
-    .then( rows => console.log('select col1:',rows) )
-    .catch( err => console.log('error=>', err))
-let input1 = {
-  col1 : '12',
-  col2 : 'kildong',
-  col3 : 'col1'
-}
 
-let input = {
-  col1 : '123',
-  col2 : 'kildong',
-  col3 : 'col2'
-}
-db.update( 'insert into test (col1, col2, col3) values(:col1, :col2, :col3)', input1)
-    .then( rows => console.log('insert rows col1:',rows) )
-    .then(() => db.commit() && db.close());
-
-const sql = 'insert into test (col1, col2, col3) values(:col1, :col2, :col3)';
-db.connect()
-    .then(conn => {
-      console.log('connect=======>')
-      conn.execute( sql, input, { outFormat: oracledb.OBJECT }, ( err, rows ) => {
-        if ( err )
-            console.log( err );
-        console.log( rows );
-        conn.commit();
-      });
-      conn.execute( sql, input, { outFormat: oracledb.OBJECT }, ( err, rows ) => {
-        if ( err )
-            console.log( err );
-        console.log( rows );
-        conn.commit();
-      });
-    })
-// db.update( 'insert into test (col1, col2, col3) values(:col1, :col2, :col3)', input)
-//     .then( rows => console.log('rows col2:',rows) )
-//     .then(() => db.update( 'insert into test (col1, col2, col3) values(:col1, :col2, :col3)', input1))
-//     .then(() => db.commit() && db.close())
-//     .catch( err => console.log('error=>', err))
+module.exports = new Database(dbconfig);
