@@ -123,14 +123,26 @@ class Database {
     * commit changed data.
     */
     commit() {
-      this.connection.commit();
+      return new Promise((resolve, reject)=>{
+        this.connection.commit(err => {
+            if (err) 
+              return reject(err)
+            resolve();
+        });
+      })
     }
 
     /*
     * rollback changed data.
     */
     rollback() {
-      this.connection.rollback();
+      return new Promise((resolve, reject)=>{
+        this.connection.rollback(err => {
+            if (err) 
+              return reject(err)
+            resolve();
+        });
+      })
     }
 
     /*
