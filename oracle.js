@@ -11,6 +11,9 @@ class Database {
         this.dbConfig = config;
     }
 
+    get STRING() {
+        return oracledb.STRING;
+    }
     connect() {
               console.log('=============connect');
       return new Promise((resolve, reject) => {
@@ -79,6 +82,26 @@ class Database {
             }
         } );
     }
+
+    executeMany( sql, args, options, cb ) {
+            if (!this.connection) {
+              oracledb.getConnection( this.dbConfig )
+              .then(connection => {
+                this.connection = connection;
+                connection.executeMany( sql, args,  options, ( err, result ) => {
+                    if ( err )
+                        return cb( err );
+                    cb( err, {rows : result, conn: connection} );
+                } );
+              })
+            } else {
+              this.connection.executeMany( sql, args, options, ( err, result ) => {
+                  if ( err )
+                      return cb( err );
+                  cb(err, {rows: result, conn: connection} );
+              } );
+            }
+    }    
 
     /*
     * commit changed data.

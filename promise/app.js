@@ -28,3 +28,27 @@ Promise.all([promise1, promise2]).then(values => values.forEach((value, i) => {
 }));
 
 // });
+
+let myPromise  = new Promise((resolve, reject)=>{
+	setTimeout(()=> {
+		resolve('Good to go!')
+	}, 5000)
+});
+
+let myPromise2  = new Promise((resolve, reject)=>{
+	setTimeout(()=> {
+		resolve('Promise 2 - the prompting!')
+	})
+  }, 1000);
+
+let myPromise3  = new Promise((resolve, reject)=>{
+setTimeout(()=> {
+	reject('Promise 3 - the prompting!')
+})
+}, 1500);
+
+
+Promise.all([myPromise, myPromise2, myPromise3])
+  .then(data => console.log(data))
+  .catch(err => console.log('err:',err))
+

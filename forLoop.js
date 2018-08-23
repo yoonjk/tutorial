@@ -65,7 +65,7 @@ Object.entries(obj1).forEach(entry => {
 const rows = 
 { outBinds:  '',
   rowsAffected: '',
-  metaData: [ { name: 'COL1' }, { name: 'COL2' }, { name: 'COL3' } ],
+  metaData: [ { name: 'COL1', val:'co1l-val' }, { name: 'COL2', val:'co1l-val' }, { name: 'COL3' , val:'co1l-val'} ],
   rows: 
    [ [ 'u01', 'jaeguk', 'test01' ],
      [ 'u02', 'jaeguk', 'test02' ],
@@ -83,6 +83,6 @@ const rows =
 
 for (const [key, value] of Object.entries(rows.metaData)) {
   const {name, val} = rows.metaData[key];
-  console.log('val:', name)
+  console.log('val:', name, val)
   console.log(`Object.key==== ${key}: ${rows.metaData[key]}, value:${value}, name:${name}`);
 }  

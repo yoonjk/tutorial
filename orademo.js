@@ -45,3 +45,46 @@ db.connect()
 //     .then(() => db.commit() && db.close())
 //     .catch( err => console.log('error=>', err))
 */
+
+
+var sql = "INSERT INTO test VALUES (:a, :b, :c)";
+
+  var binds = [
+    { a: "1", b: "Test 1 (One)", c: "test1" },
+    { a: "2", b: "Test 2 (Two)" , c: "test2"},
+    { a: "3", b: "Test 3 (Three)" , c: "test3"},
+
+    { a: "5", b: "Test 5 (Five)" , c: "test5"}
+  ];
+
+  // bindDefs is optional for IN binds but it is generally recommended.
+  // Without it the data must be scanned to find sizes and types.
+  var options = {
+    autoCommit: false,
+    bindDefs: {
+      a: { type: db.STRING, maxSize:15 },
+      b: { type: db.STRING, maxSize:15  },
+      c: { type: db.STRING, maxSize:15 }
+    } };
+
+    // db.connect().
+    // then(conn => {
+    //   conn.executeMany(sql, binds, options, function (err, result) {
+    //     if (err)
+    //       console.log(err)
+    //     else {
+    //       console.log("Result is:", result);
+    //      // return cb(null, conn);
+    //     }
+    //   });
+    // })
+    
+    db.executeMany(sql, binds, options, function (err, result) {
+        if (err)
+          console.log(err)
+        else {
+          console.log("Result is:", result.rows);
+          result.conn.commit(err => console.log(err))
+         // return cb(null, conn);
+        }
+    })
