@@ -11,6 +11,22 @@ class Database {
         this.dbConfig = config;
     }
 
+    get DATE() {
+        return oracledb.DATE;
+    }
+
+    get BLOB() {
+        return oracledb.BLOB;
+    }
+
+    get CLOB() {
+        return oracledb.CLOB;
+    }
+
+    get NUMBER() {
+        return oracledb.NUMBER;
+    }
+
     get STRING() {
         return oracledb.STRING;
     }
