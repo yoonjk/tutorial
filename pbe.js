@@ -5,8 +5,9 @@
  */
 const crypto = require('crypto');
 
-//let pbewithmd5anddes = {
-
+/*
+* KDF
+*/
 const KDF= (password,salt,iterations) =>{
     var pwd = new Buffer(password,'utf-8');
     var key = Buffer.concat([pwd, salt]);
@@ -17,6 +18,9 @@ const KDF= (password,salt,iterations) =>{
     return key;
 }
 
+/*
+* getKeyIV
+*/
 const getKeyIV= (password,salt,iterations) =>{
     var key = KDF(password,salt,iterations);
     var keybuf = new Buffer(key,'binary').slice(0,8);
@@ -24,6 +28,9 @@ const getKeyIV= (password,salt,iterations) =>{
     return [ keybuf, ivbuf ];
 }
 
+/*
+* encrypt
+*/
 const encrypt=(payload,password,salt,iterations,cb)=>{
     var kiv = getKeyIV(password,salt,iterations);
     var cipher = crypto.createCipheriv('des', kiv[0],kiv[1]);
@@ -33,6 +40,9 @@ const encrypt=(payload,password,salt,iterations,cb)=>{
     return cb(undefined,new Buffer(encrypted.join(''),'hex').toString('base64'));
 }
 
+/*
+* decrypt
+*/
 const decrypt=(payload,password,salt,iterations,cb) =>{
     var encryptedBuffer = new Buffer(payload,'base64');
     var kiv = getKeyIV(password,salt,iterations);
@@ -42,7 +52,6 @@ const decrypt=(payload,password,salt,iterations,cb) =>{
     decrypted.push(decipher.final());
     return cb(undefined, decrypted.join(''));
 }
-
 
 module.exports = {
     KDF: KDF,
